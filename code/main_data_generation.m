@@ -1,4 +1,4 @@
-function generating_data_v2
+function main_data_generation
 
 clear all
 close all
@@ -15,6 +15,10 @@ params.alpha_3 = 0; % severity
 params.alpha_4 = 0; % infectivity
 params.max_vaccines = 5000;
 
+%Calibrating beta under no vaccination
+[beta_temp,temp] = r0_beta_calibration(params,[0;0],params.R0,-1);
+params.beta = beta_temp;
+
 params.dim = length(params.pop_size);
 
 size = 100;
@@ -27,9 +31,9 @@ omega_sigma_options = struct('opt1', [0.8; 0.2], 'opt2', [0.5; 0.5], 'opt3', [0.
 delta_options = struct('opt1',0.1, 'opt2', 0.17, 'opt3', 0.5);
 
 disease_example_data = true;
-contact_matrix_data = true; 
-omega_data = true; 
-sigma_data = true; 
+contact_matrix_data = false; 
+omega_data = false; 
+sigma_data = false; 
 delta_A_data = true;
 R0_data = true;
 
@@ -154,7 +158,7 @@ if delta_A_data
     delta_A_matrix_3 = continuous_data_generation(params,size,'delta_A',linspace(0,1,size));
     writematrix(delta_A_matrix_3, 'data_delta_A_3.csv')
 
-    vaccine 4
+    %vaccine 4
     params.alpha_3 = 0;
     params.alpha_4 = 0.75;
     delta_A_matrix_4 = continuous_data_generation(params,size,'delta_A',linspace(0,1,size));
@@ -184,7 +188,7 @@ if R0_data
     R0_matrix_3 = continuous_data_generation(params,size,'R0',linspace(1,10,size));
     writematrix(R0_matrix_3,'data_R0_3.csv')
 
-    vaccine 4
+    %vaccine 4
     params.alpha_3 = 0;
     params.alpha_4 = 0.75;
     R0_matrix_4 = continuous_data_generation(params,size,'R0',linspace(1,10,size));
@@ -199,7 +203,7 @@ params.contact_matrix = [2 1; 1 0.5];
 params.R0 = 2;
 
 %recalculate beta
-[beta_temp,temp] = reproduction_number_multimodel(params,[0;0],params.R0,-1);
+[beta_temp,temp] = r0_beta_calibration(params,[0;0],params.R0,-1);
 params.beta = beta_temp;
 
 params.omega = [0.8; 0.2];
@@ -278,18 +282,13 @@ if params.max_vaccines == 8000
     vaccine_scenarios = [3050:step:4950; 4950:-step:3050];
 end
 
-[beta_temp,temp] = reproduction_number_multimodel(params,[0;0],params.R0,-1);
-params.beta = beta_temp
-
 num_points = length(vaccine_scenarios);
 %looping over discrete options
 for j = 1:options_num   
     
     %need to adjust beta for contact matrix
     if strcmp(string(variable_name),'contact_matrix')
-        [beta_temp,temp] = reproduction_number_multimodel(params,[0;0],params.R0,-1);
-%         inverse_pop_size = params.pop_size.^-1;
-%         params.(string(variable_name)) = variable_options.(strcat('opt',string(j)));
+        [beta_temp,temp] = r0_beta_calibration(params,[0;0],params.R0,-1);
         params.beta = beta_temp;
     else 
         params.(string(variable_name)) = variable_options.(strcat('opt',string(j)));
@@ -347,9 +346,6 @@ function cont_data = continuous_data_generation(params,size,variable_name,variab
 %preallocate data matrix
 cont_data = zeros(16,size);
 
-% [beta_temp,temp] = reproduction_number_multimodel(params,[0;0],params.R0,-1);
-% params.beta = beta_temp
-
 %iterate over options
 for i = 1:size
     %change variable
@@ -357,11 +353,8 @@ for i = 1:size
     
     %only recompute beta for R0
     if strcmp('R0',string(variable_name))
-        [beta_temp,temp] = reproduction_number_multimodel(params,[0;0],params.R0,-1);
-%         LP = params.pop_size - params.I0;
-%         inverse_pop_size = LP.^-1;
+        [beta_temp,temp] = r0_beta_calibration(params,[0;0],params.R0,-1);
         params.beta = beta_temp;
-%         * params.contact_matrix * diag(inverse_pop_size);
     end
 
     %1st row: variable value
@@ -512,9 +505,8 @@ total_d_1 = yout(end,DSS1) + yout(end,DVS1);
 
 
 function dYdt = deriv(t,Y,params)
-    
-    %assumptions: all asymptomatic individuals recover from infection
     dim = params.dim;
+    
     S = Y(1:dim,1);
     V = Y((dim + 1):2*dim, 1);
     ES = Y((2*dim + 1):3*dim,1);
@@ -532,13 +524,9 @@ function dYdt = deriv(t,Y,params)
     
     LP = params.pop_size - DSS - DVS;
     
-%     [beta_temp,temp] = reproduction_number_multimodel(params,[0;0],params.R0,-1);
     inverse_pop_size = LP.^-1;
     beta = params.beta * params.contact_matrix * diag(inverse_pop_size);
-
-% params.beta = beta_temp * params.contact_matrix * diag(inverse_pop_size);
-
-    
+  
     lambda = beta * diag(ISS) +...
         params.delta_A* beta * diag(ISA)+...
         (1-params.alpha_4) * (beta * diag(IVS) + ...
