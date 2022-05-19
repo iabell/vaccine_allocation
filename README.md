@@ -8,3 +8,5 @@ The data was generated using code written in MATLAB version 9.10 and the code to
 The main analysis in this paper is done using data generated in file <code>main_data_generation.m</code> . All plots, included those in the supplementary materials, are generated using functions in file ... 
   
 ### Main Figures 
+  
+  <img src=https://github.com/iabell/vaccine_allocation/blob/1034518e9394d2b3302cecb95daa80ccc88ff680/figures/annotated%20figures/annotated_sigma_figure.png width="500">
