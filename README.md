@@ -13,7 +13,17 @@ The main analysis in this paper is done using data generated in file <code>main_
 <img src=https://github.com/iabell/vaccine_allocation/blob/8b9a45817a3b34eb365e0dd0e3a9814434f1b4f3/figures/comp_diagram.png width="500">
 
 #### Figure 2
-  <img src=https://github.com/iabell/vaccine_allocation/blob/1034518e9394d2b3302cecb95daa80ccc88ff680/figures/annotated%20figures/annotated_sigma_figure.png width="500">
+  <img src=https://github.com/iabell/vaccine_allocation/blob/1f0b26f69df46e92beecfec9be683f851c8ba4f2/figures/annotated%20figures/annotated_R0_figure.png width="500">
 
 
   <img src=https://github.com/iabell/vaccine_allocation/blob/1034518e9394d2b3302cecb95daa80ccc88ff680/figures/annotated%20figures/annotated_sigma_figure.png width="500">
+
+  #### Figure 3
+ <img src=https://github.com/iabell/vaccine_allocation/blob/1f0b26f69df46e92beecfec9be683f851c8ba4f2/figures/annotated%20figures/annotated_ve_1_inf%20.png width="500">
+
+ <img src=https://github.com/iabell/vaccine_allocation/blob/1f0b26f69df46e92beecfec9be683f851c8ba4f2/figures/annotated%20figures/annotated_vc_4_inf.png width="500">
+
+ <img src=https://github.com/iabell/vaccine_allocation/blob/1f0b26f69df46e92beecfec9be683f851c8ba4f2/figures/annotated%20figures/annotated_ve_2_symp%20.png width="500">
+
+ <img src=https://github.com/iabell/vaccine_allocation/blob/1f0b26f69df46e92beecfec9be683f851c8ba4f2/figures/annotated%20figures/annotated_vc_3_deaths%20.png width="500">
+
