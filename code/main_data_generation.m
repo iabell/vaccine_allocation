@@ -30,12 +30,12 @@ omega_sigma_options = struct('opt1', [0.8; 0.2], 'opt2', [0.5; 0.5], 'opt3', [0.
 
 delta_options = struct('opt1',0.1, 'opt2', 0.17, 'opt3', 0.5);
 
-disease_example_data = true;
-contact_matrix_data = false; 
+disease_example_data = false;
+contact_matrix_data = true; 
 omega_data = false; 
 sigma_data = false; 
-delta_A_data = true;
-R0_data = true;
+delta_A_data = false;
+R0_data = false;
 
 
 if disease_example_data
@@ -286,14 +286,15 @@ num_points = length(vaccine_scenarios);
 %looping over discrete options
 for j = 1:options_num   
     
-    %need to adjust beta for contact matrix
-    if strcmp(string(variable_name),'contact_matrix')
-        [beta_temp,temp] = r0_beta_calibration(params,[0;0],params.R0,-1);
-        params.beta = beta_temp;
-    else 
-        params.(string(variable_name)) = variable_options.(strcat('opt',string(j)));
-    end
-    
+%     %need to adjust beta for contact matrix
+%     if strcmp(string(variable_name),'contact_matrix')
+%         [beta_temp,temp] = r0_beta_calibration(params,[0;0],params.R0,-1);
+%         params.beta = beta_temp;
+%     else 
+%         
+%     end
+%     
+    params.(string(variable_name)) = variable_options.(strcat('opt',string(j)));
     
     if params.max_vaccines == 2000
         vaccine_scenarios = [50:step:1950; 1950:-step:50];      
