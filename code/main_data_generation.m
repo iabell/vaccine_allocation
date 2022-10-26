@@ -23,6 +23,9 @@ params.dim = length(params.pop_size);
 
 size = 100;
 
+% R0 sensitivity analysis
+R0_sensitivity_analysis(params)
+
 %discrete data options
 contact_matrix_options = struct('opt1',[4 2; 2 1], 'opt2', [2 2; 1 1], 'opt3', [2 4; 1 2]);
 
@@ -31,7 +34,7 @@ omega_sigma_options = struct('opt1', [0.8; 0.2], 'opt2', [0.5; 0.5], 'opt3', [0.
 delta_options = struct('opt1',0.1, 'opt2', 0.17, 'opt3', 0.5);
 
 disease_example_data = false;
-contact_matrix_data = true; 
+contact_matrix_data = false; 
 omega_data = false; 
 sigma_data = false; 
 delta_A_data = false;
@@ -175,24 +178,24 @@ if R0_data
     params.alpha_1 = 0.75;
     R0_matrix_1 = continuous_data_generation(params,size,'R0',linspace(1,10,size));
     writematrix(R0_matrix_1,'data_R0_1.csv')
-
-    %vaccine 2
-    params.alpha_1 = 0;
-    params.alpha_2 = 0.75;
-    R0_matrix_2 = continuous_data_generation(params,size,'R0',linspace(1,10,size));
-    writematrix(R0_matrix_2,'data_R0_2.csv')
-
-    %vaccine 3
-    params.alpha_2 = 0;
-    params.alpha_3 = 0.75;
-    R0_matrix_3 = continuous_data_generation(params,size,'R0',linspace(1,10,size));
-    writematrix(R0_matrix_3,'data_R0_3.csv')
-
-    %vaccine 4
-    params.alpha_3 = 0;
-    params.alpha_4 = 0.75;
-    R0_matrix_4 = continuous_data_generation(params,size,'R0',linspace(1,10,size));
-    writematrix(R0_matrix_4,'data_R0_4.csv')
+ 
+     %vaccine 2 
+     params.alpha_1 = 0;
+     params.alpha_2 = 0.75;
+     R0_matrix_2 = continuous_data_generation(params,size,'R0',linspace(1,10,size));
+     writematrix(R0_matrix_2,'data_R0_2.csv')
+ 
+     %vaccine 3
+     params.alpha_2 = 0;
+     params.alpha_3 = 0.75;
+     R0_matrix_3 = continuous_data_generation(params,size,'R0',linspace(1,10,size));
+     writematrix(R0_matrix_3,'data_R0_3.csv')
+ 
+     %vaccine 4
+     params.alpha_3 = 0;
+     params.alpha_4 = 0.75;
+     R0_matrix_4 = continuous_data_generation(params,size,'R0',linspace(1,10,size));
+     writematrix(R0_matrix_4,'data_R0_4.csv')
 end
 end
 
@@ -441,9 +444,10 @@ all_vax = [vax;params.max_vaccines - vax];
 [temp_tout, temp_yout, total_i,total_i_1,total_symp_i,total_symp_i_1,total_d,total_d_1] = model(params,all_vax);
 end
 
-function total_i_1 = total_infections_group_1(params,vax)
+function [total_i_1, total_i_2] = total_infections_by_group(params,vax)
 all_vax = [vax;params.max_vaccines - vax];
 [temp_tout, temp_yout, total_i,total_i_1,total_symp_i,total_symp_i_1,total_d,total_d_1] = model(params,all_vax);
+total_i_2 = total_i - total_i_1;
 end
 
 function total_symp_i = total_symp_infections(params,vax)
@@ -618,7 +622,56 @@ optimal_vax_d = vax_allocations_d(min_index_d,:)
 end
 
 
+function R0_sensitivity_analysis(params) 
+    params.alpha_1 = 0.75;
+    params.alpha_2 = 0;
+    params.alpha_3 = 0;
+    params.alpha_4 = 0;
+    
+    %varying R0
+    R0_options = 1:0.2:10;
+    
+    %sensitivity analysis model 1
+    vax_allocations = zeros(2,length(R0_options));
+    total_infections_group_1 = zeros(1, length(R0_options));
+    total_infections_group_2 = zeros(1, length(R0_options));
+    total_infections = zeros(1, length(R0_options));
+    total_infections_vax_gp_1 = zeros(3, length(R0_options));
+    total_infections_vax_gp_2 = zeros(3, length(R0_options));
+    total_infections_no_vax = zeros(3, length(R0_options));
+    count = 1;
+    for i = R0_options
+        params.max_vaccines = 5000;
+        params.R0 = i;
+        [beta_temp, temp] = r0_beta_calibration(params, [0;0], params.R0, -1);
+        params.beta = beta_temp;
+%         total infections from vaccinating group 1
+        [total_1_vax_1, total_2_vax_1] = total_infections_by_group(params, 4950);      
+        total_infections_vax_gp_1(1, count) = total_1_vax_1;
+        total_infections_vax_gp_1(2, count) = total_2_vax_1;
+        total_infections_vax_gp_1(3, count) = total_1_vax_1 + total_2_vax_1;
 
+%         total infections from vaccinating group 2
+        [total_1_vax_2, total_2_vax_2] = total_infections_by_group(params, 50);
+        total_infections_vax_gp_2(1, count) = total_1_vax_2;
+        total_infections_vax_gp_2(2, count) = total_2_vax_2;
+        total_infections_vax_gp_2(3, count) = total_1_vax_2 + total_2_vax_2;
+
+%         total infections from no vaccination
+        params.max_vaccines = 0;
+        [total_1_no_vax, total_2_no_vax] = total_infections_by_group(params, 0);     
+        total_infections_no_vax(1,count) = total_1_no_vax;
+        total_infections_no_vax(2,count) = total_2_no_vax;
+        total_infections_no_vax(3,count) = total_1_no_vax + total_2_no_vax;
+        count = count+1;
+    end
+
+    writematrix(R0_options, 'R0_sense_R0_vals.csv')
+    writematrix(total_infections_vax_gp_1,'R0_sens_vaccinate_gp_1_infections.csv')
+    writematrix(total_infections_vax_gp_2,'R0_sens_vaccinate_gp_2_infections.csv')
+    writematrix(total_infections_no_vax, 'R0_sens_no_vax_infections.csv')
+
+end
 
 
 
