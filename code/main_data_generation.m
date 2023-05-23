@@ -26,54 +26,15 @@ size = 100;
 % R0 sensitivity analysis
 R0_sensitivity_analysis(params)
 
-%discrete data options
-contact_matrix_options = struct('opt1',[4 2; 2 1], 'opt2', [2 2; 1 1], 'opt3', [2 4; 1 2]);
-
-omega_sigma_options = struct('opt1', [0.8; 0.2], 'opt2', [0.5; 0.5], 'opt3', [0.2; 0.8]);
-
-delta_options = struct('opt1',0.1, 'opt2', 0.17, 'opt3', 0.5);
-
-disease_example_data = false;
-contact_matrix_data = false; 
-omega_data = false; 
-sigma_data = false; 
-delta_A_data = false;
-R0_data = false;
+disease_example_data = true;
+omega_data = true; 
+sigma_data = true; 
+delta_A_data = true;
+R0_data = true;
 
 
 if disease_example_data
     illustrative_example(params) 
-end
-
-if contact_matrix_data
-    params.alpha_1 = 0;
-    params.alpha_2 = 0;
-    params.alpha_3 = 0;
-    params.alpha_4 = 0;
-    
-    %vaccine 1
-    params.alpha_1 = 0.75;
-    contact_matrix_1 = discrete_data_generation(params,'contact_matrix',contact_matrix_options,3);
-    writematrix(contact_matrix_1,'contact_matrix_1.csv')
-    
-    %vaccine 2
-    params.alpha_1 = 0;
-    params.alpha_2 = 0.75;
-    contact_matrix_2 = discrete_data_generation(params,'contact_matrix',contact_matrix_options,3);
-    writematrix(contact_matrix_2,'contact_matrix_2.csv')
-   
-    %vaccine 3
-    params.alpha_2 = 0;
-    params.alpha_3 = 0.75;
-    contact_matrix_3 = discrete_data_generation(params,'contact_matrix',contact_matrix_options,3);
-    writematrix(contact_matrix_3,'contact_matrix_3.csv')
-
-    %vaccine 4
-    params.alpha_3 = 0;
-    params.alpha_4 = 0.75;
-    contact_matrix_4 = discrete_data_generation(params,'contact_matrix',contact_matrix_options,3);
-    writematrix(contact_matrix_4,'contact_matrix_4.csv')
-    
 end
 
 if omega_data 
@@ -84,30 +45,30 @@ if omega_data
     
     %vaccine 1
     params.alpha_1 = 0.75;
-    omega_1 = discrete_data_generation(params,'omega',omega_sigma_options,3);
-    writematrix(omega_1,'omega_data_1.csv')
+    omega_1 = continuous_data_generation(params,size,'omega',[linspace(0,1,size)', 0.5*ones(size,1)]');
+    writematrix(omega_1,'omega_data_1_cont.csv')
 
     
     %vaccine 2
     params.alpha_1 = 0;
     params.alpha_2 = 0.75;
-    omega_2 = discrete_data_generation(params,'omega',omega_sigma_options,3);
-    writematrix(omega_2,'omega_data_2.csv')
+    omega_2 = continuous_data_generation(params,size,'omega',[linspace(0,1,size)', 0.5*ones(size,1)]');
+    writematrix(omega_2,'omega_data_2_cont.csv')
 
     %vaccine 3
     params.alpha_2 = 0;
     params.alpha_3 = 0.75;
-    omega_3 = discrete_data_generation(params,'omega',omega_sigma_options,3);
-    writematrix(omega_3,'omega_data_3.csv')
+    omega_3 = continuous_data_generation(params,size,'omega',[linspace(0,1,size)', 0.5*ones(size,1)]');
+    writematrix(omega_3,'omega_data_3_cont.csv')
 
     %vaccine 4
     params.alpha_3 = 0;
     params.alpha_4 = 0.75;
-    omega_4 = discrete_data_generation(params,'omega',omega_sigma_options,3);
-    writematrix(omega_4,'omega_data_4.csv')
+    omega_4 = continuous_data_generation(params,size,'omega',[linspace(0,1,size)', 0.5*ones(size,1)]');
+    writematrix(omega_4,'omega_data_4_cont.csv')
 end 
 
-if sigma_data 
+if sigma_data
     params.alpha_1 = 0;
     params.alpha_2 = 0;
     params.alpha_3 = 0;
@@ -115,26 +76,25 @@ if sigma_data
     
     %vaccine 1
     params.alpha_1 = 0.75;
-    sigma_1 = discrete_data_generation(params,'sigma',omega_sigma_options,3);
+    sigma_1 = continuous_data_generation(params,size,'sigma',[linspace(0,1,size)', 0.5*ones(size,1)]');
     writematrix(sigma_1,'sigma_data_1.csv')
-
      
     %vaccine 2
     params.alpha_1 = 0;
     params.alpha_2 = 0.75;
-    sigma_2 = discrete_data_generation(params,'sigma',omega_sigma_options,3);
+    sigma_2 = continuous_data_generation(params,size,'sigma',[linspace(0,1,size)', 0.5*ones(size,1)]');
     writematrix(sigma_2,'sigma_data_2.csv')
 
     %vaccine 3
     params.alpha_2 = 0;
     params.alpha_3 = 0.75;
-    sigma_3 = discrete_data_generation(params,'sigma',omega_sigma_options,3);
+    sigma_3 = continuous_data_generation(params,size,'sigma',[linspace(0,1,size)', 0.5*ones(size,1)]');
     writematrix(sigma_3,'sigma_data_3_75.csv')
 
     %vaccine 4
     params.alpha_3 = 0;
     params.alpha_4 = 0.75;
-    sigma_4 = discrete_data_generation(params,'sigma',omega_sigma_options,3);
+    sigma_4 = continuous_data_generation(params,size,'sigma',[linspace(0,1,size)', 0.5*ones(size,1)]');
     writematrix(sigma_4,'sigma_data_4.csv')
 end 
 
@@ -215,7 +175,9 @@ params.sigma = [0.8; 0.2];
 size = 100;
 ve_options = linspace(0,1,size);
 ve_options = ve_options(1,2:end);
-max_vaccines_options = struct('opt1',2000,'opt2', 5000, 'opt3', 8000);
+total_population = sum(params.pop_size);
+cont_max_vaccines_options = 0:100:total_population - sum(params.I0);
+size_max_vaccines = length(cont_max_vaccines_options);
 
 %vaccine 1
 params.alpha_1 = 0;
@@ -226,8 +188,8 @@ ve_1 = continuous_data_generation(params,size-1,'alpha_1',ve_options);
 writematrix(ve_1, 've_1.csv')
 
 params.alpha_1 = 0.75;
-max_vax_1 = discrete_data_generation(params,'max_vaccines',max_vaccines_options,3);
-writematrix(max_vax_1, 'max_vax_1.csv')
+cont_max_vax_1 = continuous_data_generation(params,size_max_vaccines,'max_vaccines',cont_max_vaccines_options);
+writematrix(cont_max_vax_1, 'cont_max_vax_1.csv')
 
 %vaccine 2
 params.alpha_1 = 0;
@@ -238,8 +200,8 @@ ve_2 = continuous_data_generation(params,size-1,'alpha_2',ve_options);
 writematrix(ve_2, 've_2.csv')
 
 params.alpha_2 = 0.75;
-max_vax_2 = discrete_data_generation(params,'max_vaccines',max_vaccines_options,3);
-writematrix(max_vax_2, 'max_vax_2.csv')
+cont_max_vax_2 = continuous_data_generation(params,size_max_vaccines,'max_vaccines',cont_max_vaccines_options);
+writematrix(cont_max_vax_2, 'cont_max_vax_2.csv')
 
 %vaccine 3
 params.alpha_1 = 0;
@@ -250,8 +212,8 @@ ve_3 = continuous_data_generation(params,size-1,'alpha_3',ve_options);
 writematrix(ve_3, 've_3.csv')
 
 params.alpha_3 = 0.75;
-max_vax_3 = discrete_data_generation(params,'max_vaccines',max_vaccines_options,3);
-writematrix(max_vax_3, 'max_vax_3.csv')
+cont_max_vax_3 = continuous_data_generation(params,size_max_vaccines,'max_vaccines',cont_max_vaccines_options);
+writematrix(cont_max_vax_3, 'cont_max_vax_3.csv')
 
 %vaccine 4
 params.alpha_1 = 0;
@@ -262,87 +224,9 @@ ve_4 = continuous_data_generation(params,size-1,'alpha_4',ve_options);
 writematrix(ve_4, 've_4.csv')
 
 params.alpha_4 = 0.75;
-max_vax_4 = discrete_data_generation(params,'max_vaccines',max_vaccines_options,3);
-writematrix(max_vax_4, 'max_vax_4.csv')
+cont_max_vax_4 = continuous_data_generation(params,size_max_vaccines,'max_vaccines',cont_max_vaccines_options);
+writematrix(cont_max_vax_4, 'cont_max_vax_4.csv')
 end
-
-
-%% Generate discrete data
-function discrete_data = discrete_data_generation(params,variable_name,variable_options,options_num)
-%preallocate data matrix
-step = 250;
-
-% Different steps when varying vaccine coverage
-if params.max_vaccines == 2000
-    vaccine_scenarios = [50:step:1950; 1950:-step:50];      
-end 
-
-if params.max_vaccines == 5000
-    vaccine_scenarios = [50:step:4950; 4950:-step:50];
-end 
-
-if params.max_vaccines == 8000
-    vaccine_scenarios = [3050:step:4950; 4950:-step:3050];
-end
-
-num_points = length(vaccine_scenarios);
-%looping over discrete options
-for j = 1:options_num   
-    
-%     %need to adjust beta for contact matrix
-%     if strcmp(string(variable_name),'contact_matrix')
-%         [beta_temp,temp] = r0_beta_calibration(params,[0;0],params.R0,-1);
-%         params.beta = beta_temp;
-%     else 
-%         
-%     end
-%     
-    params.(string(variable_name)) = variable_options.(strcat('opt',string(j)));
-    
-    if params.max_vaccines == 2000
-        vaccine_scenarios = [50:step:1950; 1950:-step:50];      
-    end 
-
-    if params.max_vaccines == 5000
-        vaccine_scenarios = [50:step:4950; 4950:-step:50];
-    end 
-
-    if params.max_vaccines == 8000
-        vaccine_scenarios = [3050:step:4950; 4950:-step:3050];
-    end
-
-    num_points = length(vaccine_scenarios);
-    
-    
-    
-    %total infections
-    discrete_data(1:2,j) = optimisation(params,@total_infections);
-    
-    count_1 = 1;
-    for i = 3:num_points
-       discrete_data(i,j) = total_infections(params,vaccine_scenarios(1,count_1));
-       count_1 = count_1+1;
-    end
-
-    %total symp_infections
-    discrete_data(num_points + 1:num_points + 2,j) = optimisation(params,@total_symp_infections);
-    count_2 = 1;
-    for i = num_points + 3:2*num_points
-       discrete_data(i,j) = total_symp_infections(params,vaccine_scenarios(1,count_2));
-       count_2 = count_2+1;
-    end
-    
-    %total deaths
-    discrete_data(2*num_points + 1: 2*num_points + 2,j) = optimisation(params,@total_deaths);
-    count_3 = 1;
-    for i = 2*num_points + 3: 3*num_points
-       discrete_data(i,j) = total_deaths(params,vaccine_scenarios(1,count_3));
-       count_3 = count_3 + 1;
-    end
-end
-
-end
-
 
 
 function cont_data = continuous_data_generation(params,size,variable_name,variable_options)
@@ -352,17 +236,30 @@ cont_data = zeros(16,size);
 
 %iterate over options
 for i = 1:size
-    %change variable
-    params.(string(variable_name)) = variable_options(i);
     
-    %only recompute beta for R0
+    %change variable
+    if strcmp('contact_matrix', string(variable_name))
+        cmat = params.contact_matrix;
+        params.contact_matrix = ...
+        [variable_options(i), variable_options(i); 1, 1].*cmat;
+        [beta_temp,temp] = r0_beta_calibration(params,[0;0],params.R0,-1);
+        params.beta = beta_temp;
+    
+    else
+        params.(string(variable_name)) = variable_options(:,i);
+
+    end
+    
+    %recompute beta for R0
     if strcmp('R0',string(variable_name))
         [beta_temp,temp] = r0_beta_calibration(params,[0;0],params.R0,-1);
         params.beta = beta_temp;
     end
 
+    
+
     %1st row: variable value
-    cont_data(1,i) = variable_options(i);
+    cont_data(1,i) = variable_options(1,i);
     
     %2nd and 3rd rows: optimal strategy total_infections
     optimal_vax = optimisation(params, @total_infections);
@@ -372,6 +269,7 @@ for i = 1:size
     optimal_inf = total_infections(params,optimal_vax(1));
     worst_strat = flip(optimal_vax,2);
     worst_inf = total_infections(params,worst_strat(1));
+    average_strat = params.max_vaccines/2;
     average_inf = total_infections(params,params.max_vaccines/2);
     cont_data(4:6,i) = [optimal_inf; worst_inf; average_inf];
     
